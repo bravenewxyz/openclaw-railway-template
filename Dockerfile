@@ -113,8 +113,8 @@ RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"'
 COPY src ./src
 
 ENV PORT=8080
+ENV HOME=/data
 EXPOSE 8080
 
-# On startup: symlink persistent home from volume into ~/
-# /data/home survives deploys, init-home.sh links it back
+# On startup: init permissions on persistent home, then start
 CMD ["bash", "-c", "[ -x /data/workspace/scripts/init-home.sh ] && bash /data/workspace/scripts/init-home.sh; exec node src/server.js"]
