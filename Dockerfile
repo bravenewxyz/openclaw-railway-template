@@ -114,4 +114,7 @@ COPY src ./src
 
 ENV PORT=8080
 EXPOSE 8080
-CMD ["node", "src/server.js"]
+
+# On startup: symlink persistent home from volume into ~/
+# /data/home survives deploys, init-home.sh links it back
+CMD ["bash", "-c", "[ -x /data/workspace/scripts/init-home.sh ] && bash /data/workspace/scripts/init-home.sh; exec node src/server.js"]
