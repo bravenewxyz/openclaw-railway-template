@@ -67,7 +67,22 @@ RUN apt-get update \
     python3 \
     pkg-config \
     sudo \
+    jq \
+    rsync \
+    zip \
+    ffmpeg \
   && rm -rf /var/lib/apt/lists/*
+
+# Install bun (global)
+RUN curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr/local bash
+
+# Install MEGAcmd
+RUN curl -fsSL https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb -o /tmp/megacmd.deb \
+  && dpkg -i /tmp/megacmd.deb || apt-get install -f -y \
+  && rm /tmp/megacmd.deb
+
+# Install Railway CLI
+RUN npm install -g @railway/cli
 
 # Install Homebrew (must run as non-root user)
 # Create a user for Homebrew installation, install it, then make it accessible to all users
