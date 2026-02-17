@@ -76,13 +76,19 @@ RUN apt-get update \
 # Install bun (global)
 RUN curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr/local bash
 
-# Install MEGAcmd
-RUN curl -fsSL https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb -o /tmp/megacmd.deb \
-  && dpkg -i /tmp/megacmd.deb || apt-get install -f -y \
-  && rm /tmp/megacmd.deb
+# Install MEGAcmd (needs libfuse2 + fuse)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libfuse2 fuse \
+  && curl -fsSL https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb -o /tmp/megacmd.deb \
+  && dpkg -i /tmp/megacmd.deb \
+  && rm /tmp/megacmd.deb \
+  && rm -rf /var/lib/apt/lists/*
 
 # Install Railway CLI
 RUN npm install -g @railway/cli
+
+# Install trash-cli (safer than rm)
+RUN npm install -g trash-cli
 
 # Install Homebrew (must run as non-root user)
 # Create a user for Homebrew installation, install it, then make it accessible to all users
@@ -114,6 +120,10 @@ COPY src ./src
 
 ENV PORT=8080
 ENV HOME=/data
+
+# Pre-seed github.com SSH host key so git works without StrictHostKeyChecking=no
+RUN mkdir -p /root/.ssh && ssh-keyscan -t ed25519 github.com >> /root/.ssh/known_hosts 2>/dev/null
+
 EXPOSE 8080
 
 # On startup: init permissions on persistent home, then start
